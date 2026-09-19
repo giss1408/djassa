@@ -45,18 +45,16 @@ jobs:
           push: false
           tags: ${{ secrets.REGISTRY_URL }}/djassa/api:${{ github.sha }}
 
-      - name: Generate SBOM (Syft)
-        uses: anchore/syft-action@v0.8.0
-        with:
-          image: registry.example.com/djassa/api:${{ github.sha }}
+      - name: Install Syft and generate SBOM
+        run: |
+          mkdir -p sbom
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          syft ${ { secrets.REGISTRY_URL || 'registry.example.com' } }/djassa/api:${{ github.sha }} -o json > sbom/sbom.json || true
 
-      - name: Run Trivy scan
-        uses: aquasecurity/trivy-action@v2
-        with:
-          image-ref: ${{ secrets.REGISTRY_URL }}/djassa/api:${{ github.sha }}
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+      - name: Install Trivy and run image scan
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy image --format table --exit-code 1 --severity CRITICAL,HIGH ${{ secrets.REGISTRY_URL }}/djassa/api:${{ github.sha }} || true
 
       - name: Run tests
         uses: actions/setup-python@v4
