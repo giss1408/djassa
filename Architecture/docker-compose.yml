@@ -1,0 +1,119 @@
+version: "3.9"
+
+# Trois réseaux isolés : edge (public), app (interne), data (jamais exposé).
+# Voir docs/ARCHITECTURE.md pour le détail de cette segmentation.
+
+networks:
+  edge:
+    driver: bridge
+  app:
+    driver: bridge
+    internal: false   # l'API doit atteindre les services externes (mobile money, SMS)
+  data:
+    driver: bridge
+    internal: true    # aucune sortie vers internet, aucun accès depuis l'extérieur
+
+volumes:
+  postgres_data:
+  redis_data:
+  storage_data:
+
+services:
+
+  # --- Zone publique ---
+  proxy:
+    build: ./nginx
+    ports:
+      - "443:443"
+      - "80:80"   # redirection HTTP -> HTTPS uniquement
+    networks:
+      - edge
+    depends_on:
+      - api
+    restart: unless-stopped
+    # Les certificats TLS sont montés en volume en lecture seule, jamais copiés dans l'image.
+    volumes:
+      - ./infra/tls:/etc/nginx/tls:ro
+
+  # --- Zone applicative ---
+  api:
+    build: ./backend-api
+    networks:
+      - edge
+      - app
+      - data
+    depends_on:
+      - db
+      - redis
+    environment:
+      - NODE_ENV=production
+    secrets:
+      - db_password
+      - jwt_secret
+      - webhook_signing_key
+    restart: unless-stopped
+    # Pas de "ports:" ici : l'API n'est jamais exposée directement, uniquement via le proxy.
+
+  worker:
+    build: ./worker
+    networks:
+      - app
+      - data
+    depends_on:
+      - redis
+      - db
+    secrets:
+      - db_password
+    restart: unless-stopped
+
+  # --- Zone données (aucun port publié vers l'hôte) ---
+  db:
+    image: postgres:16-alpine
+    networks:
+      - data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=djassa
+      - POSTGRES_USER=djassa_app
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    secrets:
+      - db_password
+    restart: unless-stopped
+    # Pas de "ports:" : accessible uniquement depuis le réseau "data".
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - data
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+
+  storage:
+    image: minio/minio
+    networks:
+      - data
+    volumes:
+      - storage_data:/data
+    environment:
+      - MINIO_ROOT_USER_FILE=/run/secrets/storage_access_key
+      - MINIO_ROOT_PASSWORD_FILE=/run/secrets/storage_secret_key
+    secrets:
+      - storage_access_key
+      - storage_secret_key
+    command: server /data
+    restart: unless-stopped
+
+secrets:
+  db_password:
+    file: ./infra/secrets/db_password.txt        # jamais committé — voir infra/secrets/README.md
+  jwt_secret:
+    file: ./infra/secrets/jwt_secret.txt
+  webhook_signing_key:
+    file: ./infra/secrets/webhook_signing_key.txt
+  storage_access_key:
+    file: ./infra/secrets/storage_access_key.txt
+  storage_secret_key:
+    file: ./infra/secrets/storage_secret_key.txt

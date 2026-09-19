@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Pytest
+.pytest_cache/
+coverage.xml
+.coverage
+
+# MyPy
+.mypy_cache/
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Local config / secrets
+.env
+*.env
+secrets.yml
+infra/secrets/
+*.pem
+*.key
+
+# SQLite files
+*.db
+
+# Logs
+*.log
+__pycache__/
+*.pyc
+.env
+.venv
+venv/
+/.pytest_cache

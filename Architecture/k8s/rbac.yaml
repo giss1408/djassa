@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: djassa-api-sa
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: djassa-api-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints"]
+    verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: djassa-api-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: djassa-api-sa
+roleRef:
+  kind: Role
+  name: djassa-api-role
+  apiGroup: rbac.authorization.k8s.io

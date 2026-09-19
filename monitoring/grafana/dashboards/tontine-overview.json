@@ -1,0 +1,21 @@
+{
+  "annotations": {"list": []},
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Tontine Active Cycles",
+      "targets": [
+        {"expr": "sum(tontine_cycles_active) by (group)", "refId": "A"}
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Contributions Rate",
+      "targets": [
+        {"expr": "rate(tontine_contributions_total[1m])", "refId": "B"}
+      ]
+    }
+  ],
+  "schemaVersion": 16,
+  "title": "Tontine Overview"
+}

@@ -1,0 +1,21 @@
+{
+  "annotations": {"list": []},
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Celery Tasks Executed",
+      "targets": [
+        {"expr": "sum(celery_tasks_executed_total) by (task_name)", "refId": "A"}
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Celery Failures",
+      "targets": [
+        {"expr": "sum(celery_tasks_executed_total{state=\"failure\"}) by (task_name)", "refId": "B"}
+      ]
+    }
+  ],
+  "schemaVersion": 16,
+  "title": "Celery Overview"
+}

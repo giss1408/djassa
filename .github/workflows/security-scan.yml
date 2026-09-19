@@ -1,0 +1,100 @@
+name: CI — Build & Security Scan
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: djassa
+          POSTGRES_PASSWORD: djassa
+          POSTGRES_DB: djassa
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./backend-api/Dockerfile
+          push: false
+          tags: ${{ secrets.REGISTRY_URL }}/djassa/api:${{ github.sha }}
+
+      - name: Generate SBOM (Syft)
+        uses: anchore/syft-action@v0.8.0
+        with:
+          image: registry.example.com/djassa/api:${{ github.sha }}
+
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@v2
+        with:
+          image-ref: ${{ secrets.REGISTRY_URL }}/djassa/api:${{ github.sha }}
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run tests
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend-api/requirements.txt
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..20}; do
+            pg_isready -h localhost -p 5432 && break || sleep 1
+          done
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgresql+asyncpg://djassa:djassa@127.0.0.1:5432/djassa
+        run: |
+          alembic -c backend-api/alembic.ini upgrade head
+
+      - name: Run pytest
+        run: |
+          pytest -q
+
+      - name: Optionally push image
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./backend-api/Dockerfile
+          push: true
+          tags: ${{ secrets.REGISTRY_URL }}/djassa/api:${{ github.sha }}
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: ./sbom

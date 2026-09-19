@@ -1,0 +1,51 @@
+name: CI Security + Tests
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: djassa
+          POSTGRES_PASSWORD: djassa
+          POSTGRES_DB: djassa
+        options: >-
+          --health-cmd="pg_isready -U djassa" --health-interval=10s --health-timeout=5s --health-retries=5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r backend-api/requirements.txt
+
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h 127.0.0.1 -p 5432 -U djassa; do sleep 1; done
+
+      - name: Apply migrations
+        run: |
+          . .venv/bin/activate
+          export DATABASE_URL=postgresql+asyncpg://djassa:djassa@127.0.0.1:5432/djassa
+          alembic -c backend-api/alembic.ini upgrade head
+
+      - name: Run tests
+        run: |
+          . .venv/bin/activate
+          pytest -q
