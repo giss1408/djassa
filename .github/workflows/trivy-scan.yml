@@ -16,7 +16,7 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -t registry.example.com/djassa/api:dev -f backend-api/Dockerfile .
+          docker build -t registry.example.com/djassa/api:dev -f backend-api/Dockerfile backend-api
 
       - name: Run Trivy scan
         uses: aquasecurity/trivy-action@v0.3.0

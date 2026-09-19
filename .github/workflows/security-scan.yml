@@ -40,7 +40,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./backend-api
           file: ./backend-api/Dockerfile
           push: false
           tags: ${{ secrets.REGISTRY_URL }}/djassa/api:${{ github.sha }}
@@ -88,7 +88,7 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./backend-api
           file: ./backend-api/Dockerfile
           push: true
           tags: ${{ secrets.REGISTRY_URL }}/djassa/api:${{ github.sha }}
