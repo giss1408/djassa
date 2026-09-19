@@ -1,0 +1,14 @@
+replicaCount: 1
+
+image:
+  repository: giss1408/djassa
+  pullPolicy: IfNotPresent
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 8000
+
+resources: {}
+
+env: {}

@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from .api import payments, auth, transactions, export, tontine, webhooks
 from .db import engine, Base
 from . import tasks
@@ -10,6 +10,22 @@ from .rate_limiter import limiter
 from prometheus_client import start_http_server
 from .metrics import record_request
 import time
+
+# OpenTelemetry tracing setup (OTLP exporter)
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
+# Configure tracer provider with basic service resource
+resource = Resource.create({"service.name": "djassa-backend"})
+provider = TracerProvider(resource=resource)
+otlp_exporter = OTLPSpanExporter()
+provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+trace.set_tracer_provider(provider)
 
 # Middleware stack
 middleware = [
@@ -25,6 +41,15 @@ async def startup():
         await conn.run_sync(Base.metadata.create_all)
 
 app = FastAPI(title="djassa API", middleware=middleware)
+
+# instrument frameworks after app creation
+FastAPIInstrumentor.instrument_app(app)
+
+# instrument SQLAlchemy engine
+try:
+    SQLAlchemyInstrumentor().instrument(engine=engine.sync_engine)
+except Exception:
+    pass
 
 # Start Prometheus metrics server for local development
 try:

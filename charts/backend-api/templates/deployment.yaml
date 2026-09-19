@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backend-api.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "backend-api.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "backend-api.name" . }}
+    spec:
+      containers:
+        - name: backend-api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+{{- toYaml .Values.env | indent 12 }}
+          resources: {{ toYaml .Values.resources | indent 10 }}

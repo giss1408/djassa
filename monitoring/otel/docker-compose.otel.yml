@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.89.0
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./otel-config.yml:/etc/otel-collector-config.yml:ro
+    ports:
+      - "4318:4318" # OTLP HTTP
+      - "4317:4317" # OTLP gRPC
+
+  tempo:
+    image: grafana/tempo:1.5.0
+    ports:
+      - "9411:9411" # jaeger
+      - "3200:3200" # query
+    volumes:
+      - tempo-data:/var/tempo
+
+volumes:
+  tempo-data:

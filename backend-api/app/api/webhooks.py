@@ -8,8 +8,26 @@ import hashlib
 import json
 from datetime import datetime, timedelta
 import os
-
+from datetime import timezone
 REPLAY_WINDOW_SECONDS = int(os.getenv("WEBHOOK_REPLAY_WINDOW", "300"))
+IDEMPOTENCY_TTL_SECONDS = int(os.getenv("WEBHOOK_IDEMPOTENCY_TTL", "86400"))
+
+# key rotation support: secrets are stored as comma-separated versions in env var
+def load_active_and_previous_keys(env_var_name: str):
+    raw = os.getenv(env_var_name, "")
+    if not raw:
+        return []
+    # newest first
+    return [k for k in [s.strip() for s in raw.split(",")] if k]
+
+def verify_signature_with_rotation(raw_body: bytes, signature: str, keys: list) -> bool:
+    if not signature or not keys:
+        return False
+    for key in keys:
+        mac = hmac.new(key.encode(), raw_body, hashlib.sha256).hexdigest()
+        if hmac.compare_digest(mac, signature):
+            return True
+    return False
 
 router = APIRouter(prefix="/api/webhooks", tags=["webhooks"])
 
@@ -35,10 +53,10 @@ async def mobile_money_webhook(
     except Exception:
         raise HTTPException(status_code=400, detail="invalid json")
 
-    # Secret should be stored in secrets manager; fallback to env for dev
-    secret = os.getenv("MOBILE_MONEY_SECRET", "dev-secret")
+    # Secret rotation: `MOBILE_MONEY_SECRETS` contains comma-separated keys (latest first)
+    keys = load_active_and_previous_keys("MOBILE_MONEY_SECRETS")
 
-    ok = await verify_signature(raw, x_signature or "", secret)
+    ok = verify_signature_with_rotation(raw, x_signature or "", keys)
     if not ok:
         raise HTTPException(status_code=401, detail="invalid signature")
 
@@ -58,11 +76,15 @@ async def mobile_money_webhook(
         except Exception:
             raise HTTPException(status_code=400, detail="invalid timestamp")
 
+    # check idempotency record; expired markers should be ignored
     existing = await db.get(WebhookIdempotency, external_id)
     if existing:
-        return {"status": "already_processed"}
+        # check TTL
+        if existing.created_at and (datetime.utcnow() - existing.created_at).total_seconds() < IDEMPOTENCY_TTL_SECONDS:
+            return {"status": "already_processed"}
+        # else consider expired and allow reprocessing
 
-    # persist idempotency marker and event
+    # persist idempotency marker and event (created_at set by DB default)
     marker = WebhookIdempotency(external_id=external_id)
     event = WebhookEvent(payload=json.dumps(payload), external_id=external_id)
     db.add(marker)
