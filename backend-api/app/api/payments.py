@@ -17,6 +17,19 @@ from ..services.payment_state import PaymentStatus, transition
 
 router = APIRouter()
 PROVIDER_TIMEOUT_SECONDS = 10
+PROVIDER_ATTEMPTS = 2
+
+
+async def provider_call(operation):
+    last_error = None
+    for attempt in range(PROVIDER_ATTEMPTS):
+        try:
+            return await asyncio.wait_for(operation(), timeout=PROVIDER_TIMEOUT_SECONDS)
+        except (asyncio.TimeoutError, OSError, RuntimeError) as exc:
+            last_error = exc
+            if attempt + 1 < PROVIDER_ATTEMPTS:
+                await asyncio.sleep(0.1 * (attempt + 1))
+    raise last_error
 
 
 def payment_output(payment: PaymentModel) -> PaymentOut:
@@ -78,15 +91,12 @@ async def create_payment(
         )
         db.add(payment)
         await db.flush()
-        result = await asyncio.wait_for(
-            provider.initiate_payment(
-                amount=payload.amount,
-                currency=payload.currency.upper(),
-                recipient_id=payload.recipient_id,
-                idempotency_key=key,
-            ),
-            timeout=PROVIDER_TIMEOUT_SECONDS,
-        )
+        result = await provider_call(lambda: provider.initiate_payment(
+            amount=payload.amount,
+            currency=payload.currency.upper(),
+            recipient_id=payload.recipient_id,
+            idempotency_key=key,
+        ))
         payment.status = transition(payment.status, PaymentStatus.PENDING)
         payment.external_id = result.external_id
         payment.provider_status = result.status
@@ -126,7 +136,7 @@ async def refund_payment(payment_id: int, payload: RefundRequest, db: AsyncSessi
     payment.status = transition(payment.status, PaymentStatus.REFUND_PENDING)
     await db.flush()
     try:
-        result = await asyncio.wait_for(provider.refund(external_id=payment.external_id, amount=amount, idempotency_key=payload.idempotency_key), timeout=PROVIDER_TIMEOUT_SECONDS)
+        result = await provider_call(lambda: provider.refund(external_id=payment.external_id, amount=amount, idempotency_key=payload.idempotency_key))
         refund.external_id = result.external_id
         refund.status = result.status
         await db.commit()
