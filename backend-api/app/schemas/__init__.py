@@ -1,11 +1,13 @@
-from pydantic import BaseModel
 from datetime import datetime
+from decimal import Decimal
+
+from pydantic import BaseModel, Field
 
 
 class Payment(BaseModel):
-    amount: float
-    currency: str
-    recipient_id: str
+    amount: Decimal = Field(gt=0, max_digits=18, decimal_places=2)
+    currency: str = Field(min_length=3, max_length=8)
+    recipient_id: str = Field(min_length=1, max_length=128)
 
 
 class PaymentOut(Payment):
@@ -15,9 +17,9 @@ class PaymentOut(Payment):
 class Transaction(BaseModel):
     merchant_id: int
     user_id: str | None = None
-    amount: float
-    currency: str
-    type: str
+    amount: Decimal = Field(gt=0, max_digits=18, decimal_places=2)
+    currency: str = Field(min_length=3, max_length=8)
+    type: str = Field(min_length=1, max_length=32)
 
 
 class TransactionOut(Transaction):
@@ -33,9 +35,9 @@ class Merchant(BaseModel):
 
 
 class ConsentIn(BaseModel):
-    user_id: str
+    user_id: str | None = None
     merchant_id: int
-    scope: str
+    scope: str = Field(min_length=1, max_length=255)
 
 
 class ConsentOut(ConsentIn):

@@ -1,15 +1,14 @@
 from fastapi import FastAPI, Request
 from .api import payments, auth, transactions, export, tontine, webhooks
-from .db import engine, Base
-from . import tasks
+from .db import engine
 from starlette.middleware import Middleware
 from slowapi.middleware import SlowAPIMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from .rate_limiter import limiter
-from prometheus_client import start_http_server
 from .metrics import record_request
 import time
+import os
 
 # OpenTelemetry tracing setup (OTLP exporter)
 from opentelemetry import trace
@@ -23,25 +22,26 @@ from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 # Configure tracer provider with basic service resource
 resource = Resource.create({"service.name": "djassa-backend"})
 provider = TracerProvider(resource=resource)
-otlp_exporter = OTLPSpanExporter()
-provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+if os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"):
+    otlp_exporter = OTLPSpanExporter()
+    provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
 trace.set_tracer_provider(provider)
 
 # Middleware stack
 middleware = [
     Middleware(SlowAPIMiddleware),
-    Middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+    Middleware(
+        CORSMiddleware,
+        allow_origins=[origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if origin.strip()],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Signature"],
+    ),
 ]
 
 
 app = FastAPI(title="djassa API", middleware=middleware)
 
-
-@app.on_event("startup")
-async def startup():
-    # Create DB tables in the skeleton environment (sqlite default)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
 # instrument frameworks after app creation
 FastAPIInstrumentor.instrument_app(app)
@@ -49,12 +49,6 @@ FastAPIInstrumentor.instrument_app(app)
 # instrument SQLAlchemy engine
 try:
     SQLAlchemyInstrumentor().instrument(engine=engine.sync_engine)
-except Exception:
-    pass
-
-# Start Prometheus metrics server for local development
-try:
-    start_http_server(8001)
 except Exception:
     pass
 
@@ -101,13 +95,6 @@ def metrics():
     return Response(content=data, media_type=CONTENT_TYPE_LATEST)
 
 
-@app.on_event("startup")
-async def _start_background_worker():
-    import asyncio
-    # start the background worker loop (non-blocking)
-    asyncio.create_task(tasks.background_worker())
-
-
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -115,4 +102,6 @@ async def health():
 
 @app.get("/ready")
 async def ready():
+    async with engine.connect() as connection:
+        await connection.exec_driver_sql("SELECT 1")
     return {"ready": True}

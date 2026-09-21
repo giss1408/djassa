@@ -1,11 +1,13 @@
 import pytest
 from httpx import AsyncClient
+from httpx import ASGITransport
 from app.main import app
+from app.core.security import create_access_token
 
 
 @pytest.mark.asyncio
 async def test_create_and_list_transactions():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         token_resp = await ac.post("/api/token", data={"username": "demo", "password": "demo123"})
         assert token_resp.status_code == 200
         token = token_resp.json()["access_token"]
@@ -19,6 +21,7 @@ async def test_create_and_list_transactions():
         assert r.status_code == 201
         tx = r.json()
         assert tx["merchant_id"] == 1
+        assert tx["user_id"] == "demo"
 
         # list transactions
         r2 = await ac.get("/api/transactions/merchant/1", headers={"Authorization": f"Bearer {token}"})
@@ -26,3 +29,11 @@ async def test_create_and_list_transactions():
         items = r2.json()
         assert isinstance(items, list)
         assert len(items) >= 1
+
+        other_token = create_access_token({"sub": "other-user"})
+        other_response = await ac.get(
+            "/api/transactions/merchant/1",
+            headers={"Authorization": f"Bearer {other_token}"},
+        )
+        assert other_response.status_code == 200
+        assert other_response.json() == []

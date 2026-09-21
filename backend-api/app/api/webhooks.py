@@ -7,9 +7,8 @@ from ..rate_limiter import limiter
 import hmac
 import hashlib
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 import os
-from datetime import timezone
 REPLAY_WINDOW_SECONDS = int(os.getenv("WEBHOOK_REPLAY_WINDOW", "300"))
 IDEMPOTENCY_TTL_SECONDS = int(os.getenv("WEBHOOK_IDEMPOTENCY_TTL", "86400"))
 
@@ -41,8 +40,7 @@ async def verify_signature(raw_body: bytes, signature: str, secret: str) -> bool
 
 
 @router.post("/mobile-money")
-@router.post("/mobile-money")
-@limiter.limit("10/minute", key_func=lambda: "webhook")
+@limiter.limit("10/minute")
 async def mobile_money_webhook(
     request: Request,
     x_signature: str | None = Header(None),
@@ -51,8 +49,10 @@ async def mobile_money_webhook(
     raw = await request.body()
     try:
         payload = json.loads(raw)
-    except Exception:
+    except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="invalid json")
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="invalid json payload")
 
     # Secret rotation: `MOBILE_MONEY_SECRETS` contains comma-separated keys (latest first)
     keys = load_active_and_previous_keys("MOBILE_MONEY_SECRETS")
@@ -66,16 +66,21 @@ async def mobile_money_webhook(
     if not external_id:
         raise HTTPException(status_code=400, detail="missing transaction id")
 
-    # Basic replay protection: require a `timestamp` field within allowed window
+    # Replay protection is mandatory for signed payment events.
     ts = payload.get("timestamp")
-    if ts:
-        try:
-            ev_time = datetime.fromisoformat(ts)
-            now = datetime.utcnow()
-            if abs((now - ev_time).total_seconds()) > REPLAY_WINDOW_SECONDS:
-                raise HTTPException(status_code=400, detail="replay window exceeded")
-        except Exception:
-            raise HTTPException(status_code=400, detail="invalid timestamp")
+    if not ts or not isinstance(ts, str):
+        raise HTTPException(status_code=400, detail="missing timestamp")
+    try:
+        ev_time = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        if ev_time.tzinfo is None:
+            ev_time = ev_time.replace(tzinfo=timezone.utc)
+        now = datetime.now(timezone.utc)
+        if abs((now - ev_time).total_seconds()) > REPLAY_WINDOW_SECONDS:
+            raise HTTPException(status_code=400, detail="replay window exceeded")
+    except HTTPException:
+        raise
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail="invalid timestamp")
 
     # check idempotency record; expired markers should be ignored
     existing = await db.get(WebhookIdempotency, external_id)
@@ -90,7 +95,14 @@ async def mobile_money_webhook(
     event = WebhookEvent(payload=json.dumps(payload), external_id=external_id)
     db.add(marker)
     db.add(event)
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as exc:
+        from sqlalchemy.exc import IntegrityError
+        if not isinstance(exc, IntegrityError):
+            raise
+        await db.rollback()
+        return {"status": "already_processed"}
 
     # Enqueue async processing via Celery
     try:

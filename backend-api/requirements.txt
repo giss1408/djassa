@@ -9,6 +9,7 @@ sqlalchemy>=1.4
 asyncpg
 python-jose[cryptography]
 passlib[bcrypt]
+bcrypt<5
 aiosqlite
 celery[redis]
 redis

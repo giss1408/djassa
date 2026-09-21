@@ -30,7 +30,7 @@ Le premier projet de l'écosystème est une **application de fidélité client p
 
 **Modèle économique** : abonnement mensuel par commerçant (SaaS), payé en mobile money, avec des paliers selon le volume de clients actifs.
 
-📄 Voir [`docs/loyalty-app.md`](docs/loyalty-app.md) pour le détail du MVP, du modèle de pricing et du plan pilote *(à créer)*.
+📄 Voir [Product Concept](PRODUCT-CONCEPT.md), [Business Model](BUSINESS-MODEL.md), and [Product Roadmap](ROADMAP.md) for the synchronized English MVP, pricing, and pilot documentation.
 
 ## 🗺️ Roadmap de l'écosystème
 

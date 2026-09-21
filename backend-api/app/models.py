@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, func, Text, Boolean
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, func, Text, Boolean, Index
 from sqlalchemy.orm import relationship
 from .db import Base
 
@@ -23,6 +23,10 @@ class Merchant(Base):
 
 class Transaction(Base):
     __tablename__ = "transactions"
+    __table_args__ = (
+        Index("ix_transactions_merchant_timestamp", "merchant_id", "timestamp"),
+        Index("ix_transactions_merchant_user_timestamp", "merchant_id", "user_id", "timestamp"),
+    )
     id = Column(Integer, primary_key=True, index=True)
     merchant_id = Column(Integer, ForeignKey("merchants.id"), nullable=False, index=True)
     user_id = Column(String(128), nullable=True, index=True)
@@ -36,6 +40,7 @@ class Transaction(Base):
 
 class Consent(Base):
     __tablename__ = "consents"
+    __table_args__ = (Index("ix_consents_user_merchant_scope", "user_id", "merchant_id", "scope"),)
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(String(128), nullable=False, index=True)
     merchant_id = Column(Integer, ForeignKey("merchants.id"), nullable=False)
@@ -63,6 +68,7 @@ class TontineGroup(Base):
 
 class TontineMember(Base):
     __tablename__ = "tontine_members"
+    __table_args__ = (Index("ix_tontine_members_group_user_active", "group_id", "user_id", "active"),)
     id = Column(Integer, primary_key=True, index=True)
     group_id = Column(Integer, ForeignKey("tontine_groups.id"), nullable=False, index=True)
     user_id = Column(String(128), nullable=False, index=True)
@@ -91,6 +97,7 @@ class TontineCycle(Base):
 
 class Contribution(Base):
     __tablename__ = "tontine_contributions"
+    __table_args__ = (Index("ix_contributions_group_member_paid_at", "group_id", "member_id", "paid_at"),)
     id = Column(Integer, primary_key=True, index=True)
     group_id = Column(Integer, ForeignKey("tontine_groups.id"), nullable=False, index=True)
     cycle_id = Column(Integer, ForeignKey("tontine_cycles.id"), nullable=True, index=True)
