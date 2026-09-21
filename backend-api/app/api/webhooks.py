@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..db import get_db
 from ..models import WebhookEvent, WebhookIdempotency
 from ..schemas.webhook import WebhookIn
+from ..rate_limiter import limiter
 import hmac
 import hashlib
 import json

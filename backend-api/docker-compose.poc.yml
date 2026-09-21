@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: djassa
-      POSTGRES_PASSWORD: djassa
-      POSTGRES_DB: djassa
+      POSTGRES_USER: ${POSTGRES_USER:-djassa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_DB: ${POSTGRES_DB:-djassa}
     volumes:
       - db-data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -21,10 +19,12 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql+asyncpg://djassa:djassa@db:5432/djassa
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      DJASSA_SECRET_KEY: ${DJASSA_SECRET_KEY:?DJASSA_SECRET_KEY must be set}
+      MOBILE_MONEY_SECRETS: ${MOBILE_MONEY_SECRETS:?MOBILE_MONEY_SECRETS must be set}
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       - db
       - redis
@@ -36,8 +36,10 @@ services:
       dockerfile: Dockerfile
     command: celery -A app.celery_app worker --loglevel=info
     environment:
-      - DATABASE_URL=postgresql+asyncpg://djassa:djassa@db:5432/djassa
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      DJASSA_SECRET_KEY: ${DJASSA_SECRET_KEY:?DJASSA_SECRET_KEY must be set}
+      MOBILE_MONEY_SECRETS: ${MOBILE_MONEY_SECRETS:?MOBILE_MONEY_SECRETS must be set}
     depends_on:
       - db
       - redis

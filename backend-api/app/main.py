@@ -34,13 +34,14 @@ middleware = [
 ]
 
 
+app = FastAPI(title="djassa API", middleware=middleware)
+
+
 @app.on_event("startup")
 async def startup():
     # Create DB tables in the skeleton environment (sqlite default)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
-app = FastAPI(title="djassa API", middleware=middleware)
 
 # instrument frameworks after app creation
 FastAPIInstrumentor.instrument_app(app)
