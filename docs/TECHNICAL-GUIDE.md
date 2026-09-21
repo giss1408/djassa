@@ -108,6 +108,16 @@ POST /api/support/requests
 
 The request includes `country_code`, `language`, `channel`, `category`, and `message`. The API validates that the selected language and channel are available for the selected country and stores the language/channel metadata so an operator or future SMS/WhatsApp adapter can route it correctly. The current confirmation catalog contains English and French; unsupported translations fall back to English while preserving the requested language for support handling.
 
+Identity verification is progressive: Tier 0 supports low-friction loyalty with a phone or operator-linked identifier; higher-risk tontine, savings, and credit workflows must request stronger partner-approved verification. The backend should store verification outcomes and provenance rather than raw biometric material whenever possible.
+
+The current identity API is:
+
+- `POST /api/identity/profile`: creates a Tier 0 profile after country and E.164 phone-prefix validation.
+- `GET /api/identity/me`: returns the authenticated user's verification metadata.
+- `POST /api/identity/verification/1` or `/2`: records a provider-required request; it does not self-approve a higher tier.
+
+Tier 1 and Tier 2 completion require a future licensed identity/KYC adapter or operator attestation path. The demo authentication system is not a production identity provider.
+
 ## GraphQL
 
 GraphQL is available at `POST /graphql` as a complementary API surface. It currently exposes public country capability queries, authenticated `myTransactions` queries, and authenticated `syncTransactions` mutations with the same 50-operation limit and idempotency behavior as REST.

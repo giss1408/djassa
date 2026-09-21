@@ -10,8 +10,10 @@ Deliverables:
 
 - Five to ten merchant interviews.
 - A narrow pilot agreement.
+- One target corridor, merchant segment, and acquisition channel.
 - Payment-provider sandbox access.
 - Data inventory and consent design.
+- Identity and KYC boundary review with the mobile-money/payment partner.
 - Regulatory review for planned payment and data features.
 - Baseline metrics and support process.
 
@@ -27,11 +29,14 @@ Exit criteria:
 Deliverables:
 
 - Merchant and customer identity.
+- Tier 0 phone/operator-linked identity for loyalty.
 - Loyalty rules and points.
 - Transaction history.
 - Merchant reporting.
 - Consent-controlled exports.
 - Secure authentication and ownership checks.
+- Offline transaction queue and synchronization.
+- Country profile and localized support workflow.
 
 Measure:
 
@@ -40,8 +45,35 @@ Measure:
 - Customer repeat rate.
 - Merchant retention.
 - Cost per active merchant.
+- Paid conversion and renewal rate.
+- Support cost per active outlet.
+- Data consumed per active user.
 
-## Phase 2: Digital tontine
+Identity gate:
+
+- Do not require biometric or national-ID verification for basic loyalty.
+- Define the operator identity signal and consent before relying on it.
+- Test account-duplication prevention without exposing unnecessary personal data.
+
+## Phase 2: Merchant operations and network expansion
+
+**Goal:** Make the core merchant product valuable and repeatable in the first corridor before adding financial complexity.
+
+Deliverables:
+
+- Campaigns, customer reactivation, and merchant reporting.
+- Merchant referral and association onboarding.
+- Country-specific payment/support adapters.
+- Progressive verification workflow and fraud-review queue, only where the partner and regulator approve it.
+- Repeatable onboarding and support playbook.
+
+Exit criteria:
+
+- Merchants pay or renew.
+- Acquisition and support economics are understood.
+- The product works under low-connectivity conditions.
+
+## Phase 3: Digital tontine
 
 **Goal:** Help existing community groups track contributions and schedules.
 
@@ -53,9 +85,9 @@ Deliverables:
 - Idempotent webhook processing.
 - Reconciliation and dispute workflow.
 
-Do not begin until the MVP has stable identity, audit logging, authorization, and consent controls.
+Do not begin until the merchant product has validated willingness to pay and the platform has stable identity, audit logging, authorization, consent, payment-state, and reconciliation controls.
 
-## Phase 3: Explainable reliability indicator
+## Phase 4: Explainable reliability indicator
 
 **Goal:** Provide a transparent internal signal based on regular activity.
 
@@ -66,14 +98,16 @@ Deliverables:
 - Correction and appeal workflow.
 - Bias and outcome monitoring.
 - No third-party sharing without consent and legal review.
+- Verification tier and identity evidence are visible to the user.
 
-## Phase 4: Partner financial services
+## Phase 5: Partner financial services
 
 **Goal:** Connect eligible users to regulated savings or credit partners.
 
 Deliverables:
 
 - Written partner agreement.
+- Partner-approved KYC and identity-data sharing contract.
 - Consent and data-sharing contract.
 - Direct fund flow to the regulated provider.
 - Referral and outcome tracking.
@@ -81,9 +115,9 @@ Deliverables:
 
 Djassa remains a technology and distribution partner unless its regulatory status changes.
 
-## Phase 5: Geographic and product expansion
+## Phase 6: Geographic and product expansion
 
-Possible extensions include rural merchant networks, agriculture, insurance, and additional UEMOA markets. Each extension requires separate user research, partner validation, and regulatory review.
+Possible extensions include a second UEMOA country, rural merchant networks, agriculture, and insurance. Each extension requires separate user research, local payment/support adapters, partner validation, and regulatory review. Expansion should reuse technical components while localizing commercial operations.
 
 ## Roadmap governance
 

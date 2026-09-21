@@ -32,6 +32,16 @@ This document defines required controls. It is not a certification that every co
 
 The current demo login must be replaced by a real user store or identity provider before production.
 
+## Progressive identity and KYC
+
+Identity assurance must match feature risk:
+
+- **Tier 0:** phone or operator-linked identifier for loyalty only.
+- **Tier 1:** phone verification plus approved liveness/selfie verification for tontine or partner savings workflows.
+- **Tier 2:** national-ID capture and partner-approved cross-check before credit-history export.
+
+These tiers are a product and control design, not a claim that an operator will expose KYC data. Confirm data-sharing authority, consent, retention, biometric processing, cross-border transfer, and deletion obligations with the licensed partner and qualified local counsel. Prefer a verification result or attestation over storing raw identity documents or biometric material. Never make basic loyalty conditional on high-friction verification.
+
 ## Secrets
 
 Required application variables:

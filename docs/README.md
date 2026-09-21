@@ -5,7 +5,9 @@ This folder contains the English decision documents for the product and the tech
 ## Product and business
 
 - [Product concept](PRODUCT-CONCEPT.md): what Djassa is, who it serves, and what it should not do.
+- [Product concept v2 source](djassa-product-concept-v2.md): event-stream framing and product rationale.
 - [Business model](BUSINESS-MODEL.md): customers, value exchange, revenue streams, pricing experiments, and unit economics.
+- [Business model](BUSINESS-MODEL.md): merchant-first monetization, corridor strategy, pricing, and unit economics.
 - [Partner and outreach plan](PARTNERS-AND-OUTREACH.md): who to contact, why, what to ask, and how to run a pilot conversation.
 - [Product roadmap](ROADMAP.md): phases, dependencies, measurements, and exit criteria.
 

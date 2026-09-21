@@ -200,3 +200,19 @@ class SupportRequest(Base):
     message = Column(Text, nullable=False)
     status = Column(String(32), nullable=False, default="open", index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class IdentityProfile(Base):
+    __tablename__ = "identity_profiles"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String(128), nullable=False, unique=True, index=True)
+    country_code = Column(String(2), nullable=False)
+    phone_e164 = Column(String(16), nullable=False)
+    operator = Column(String(64), nullable=False)
+    verification_tier = Column(Integer, nullable=False, default=0)
+    verification_status = Column(String(32), nullable=False, default="tier_0_pending")
+    verification_provider = Column(String(128), nullable=True)
+    attestation_reference = Column(String(255), nullable=True)
+    consent_version = Column(String(64), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

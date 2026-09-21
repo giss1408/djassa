@@ -64,6 +64,18 @@ Engage the BCEAO or qualified local regulatory counsel before any feature that m
 6. Define consent, data-sharing, reconciliation, support, and incident processes.
 7. Run the pilot and publish measured results to prospective partners.
 
+## Channel strategy
+
+The lowest-cost acquisition path is likely a trusted channel rather than direct consumer advertising. Test these channels in order:
+
+1. Merchant associations and cooperatives.
+2. Payment aggregators and mobile-money merchant networks.
+3. Distributors serving pharmacies, groceries, salons, and restaurants.
+4. Microfinance institutions that already serve the target merchants.
+5. Telecom or messaging partnerships after the workflow is proven.
+
+For each channel, measure merchants activated, merchants still active after 30/90 days, support cost, and revenue per acquired outlet. A partnership is valuable only if it lowers acquisition or support cost while preserving user trust.
+
 ## What to bring to every meeting
 
 - The problem in one paragraph.
@@ -122,6 +134,7 @@ Regulatory or commercial assumptions to verify:
 - Do not send real customer data in a first meeting.
 - Use synthetic or anonymized pilot data until a written data-sharing agreement exists.
 - Verify every public statistic and institutional contact before publishing it.
+- Do not describe a continent-wide rollout. Present a specific country, city/corridor, merchant segment, and pilot volume.
 
 Related documents:
 

@@ -1,5 +1,11 @@
 # Djassa Business Model
 
+## Commercial thesis
+
+Djassa should be built and sold as **merchant software first, financial infrastructure second**. The merchant subscription funds the core product. Financial partners create additional revenue only after Djassa has reliable usage, consent, reconciliation, and regulatory boundaries.
+
+The initial go-to-market unit is not a country or a continent. It is a **merchant cluster**: one city, trade association, distributor network, payment partner, or microfinance channel with enough connected merchants to reduce acquisition and support cost.
+
 ## Customer segments
 
 ### Primary customers
@@ -7,6 +13,8 @@
 - Independent merchants and small retailers.
 - Informal businesses that need repeat customers and better revenue visibility.
 - Community groups that already operate tontines or savings circles.
+
+Prioritize merchants with repeat purchases and a clear operator: pharmacies, neighborhood retail, food service, salons, and merchant associations. Avoid beginning with businesses where transaction frequency is too low to prove retention value.
 
 ### Financial partners
 
@@ -29,6 +37,7 @@
 - A portable view of their own activity and rewards.
 - Access to digital tontines or savings products through approved partners.
 - Financial explanations that are understandable and timely.
+- Low-friction onboarding for loyalty, with stronger verification requested only for higher-risk services.
 
 ### What partners receive
 
@@ -56,6 +65,17 @@ Revenue should be layered over time. The first revenue stream must not depend on
 4. **Partner software or data services**
    - Reporting, reconciliation, or consented risk-data services for institutions.
    - Personal data must not be sold casually; aggregation, anonymization, purpose limitation, and consent must be defined before launch.
+
+## Recommended revenue order
+
+1. Merchant subscription or paid pilot.
+2. Optional paid messaging/campaign package with transparent pass-through costs.
+3. Multi-outlet and merchant-network contracts.
+4. Payment orchestration revenue where the licensed provider permits it.
+5. Consent-based referral fees from regulated savings or credit partners.
+6. Institutional reporting or reconciliation services.
+
+Do not make referral revenue the first business assumption. It depends on partner approval, regulatory review, user consent, and measurable financial outcomes.
 
 ## Unit economics to measure
 
@@ -88,6 +108,13 @@ Pricing should be tested with merchants rather than treated as final. A simple f
 
 Use local currency and publish whether messaging, payment, and partner fees are included. Avoid promising credit access as part of a paid plan.
 
+Test willingness to pay with a paid pilot rather than a permanently free product:
+
+- Charge per outlet for the core service.
+- Offer a short trial only when the merchant completes onboarding and records real activity.
+- Price network contracts separately from individual merchants.
+- Keep financial referral revenue outside the merchant subscription so the value exchange remains clear.
+
 ## Commercial message
 
 The strongest merchant message is:
@@ -108,6 +135,8 @@ Djassa must not:
 
 Before launching payment, savings, scoring, or credit features, obtain legal and regulatory advice and confirm the role of the licensed partner.
 
+Identity verification is also a cost and trust decision. Keep Tier 0 onboarding cheap and fast. Trigger biometric or national-ID checks only when the expected fraud, financial, or partner-underwriting benefit justifies the verification cost and the user has a clear reason to complete it.
+
 ## Pilot decision gate
 
 Scale only when the pilot demonstrates:
@@ -117,6 +146,16 @@ Scale only when the pilot demonstrates:
 - Merchants willing to pay or renew.
 - A measurable operational advantage for at least one financial or payment partner.
 - No unresolved critical privacy, authorization, reconciliation, or regulatory issue.
+
+## Unit-economics gate
+
+Do not expand geographically until one pilot corridor can show:
+
+- Merchant acquisition cost lower than twelve months of expected gross profit.
+- At least three consecutive months of merchant retention or renewal evidence.
+- Support and messaging costs known per active outlet.
+- A repeat-use improvement that merchants can understand.
+- A path to positive contribution margin without assuming future credit commissions.
 
 Related documents:
 

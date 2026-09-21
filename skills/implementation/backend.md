@@ -33,6 +33,7 @@ Contributor notes:
 - Use `selectinload`/`joinedload`, composite indexes, pagination, and streaming for large reads/exports.
 - Keep provider-specific payment logic behind an adapter and country-specific rules in `app/core/countries.py`.
 - Payment integrations must model intents, external IDs, state transitions, reconciliation, refunds, disputes, provider idempotency, timeouts, and retries; never mark success from an unverified client response.
+- Identity flows must use progressive tiers, validate country/phone consistency, store verification outcomes rather than raw biometric material, and require a trusted provider before advancing beyond Tier 0.
 - Treat GraphQL as an additional API surface, not an authorization bypass; apply the same identity, ownership, pagination, and rate-limit rules as REST.
 - Apply migrations explicitly; do not use `Base.metadata.create_all()` in production startup.
 - Run `pytest -q`, migration upgrade tests, `python -m py_compile`, and `git diff --check` before review.
