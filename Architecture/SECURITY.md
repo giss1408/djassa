@@ -42,6 +42,22 @@ Identity assurance must match feature risk:
 
 These tiers are a product and control design, not a claim that an operator will expose KYC data. Confirm data-sharing authority, consent, retention, biometric processing, cross-border transfer, and deletion obligations with the licensed partner and qualified local counsel. Prefer a verification result or attestation over storing raw identity documents or biometric material. Never make basic loyalty conditional on high-friction verification.
 
+## Federated identity boundary
+
+The strategic identity direction is a federated trust and consent layer, not a central national identity database. Djassa should store scoped attestations and metadata such as issuer, assurance level, purpose, issue time, expiry, revocation status, and audit reference. It should not copy raw operator KYC records, biometric databases, or national-ID repositories unless a specific legal and operational mandate permits it.
+
+Every federated integration must define:
+
+- The authoritative issuer.
+- The exact claim being exchanged.
+- User consent and permitted purpose.
+- Expiry and revocation behavior.
+- Liability for incorrect or stale claims.
+- Audit access and retention.
+- Security, breach notification, and deletion responsibilities.
+
+This identity-manager direction requires formal governance and regulatory approval before being presented as a production service in Côte d'Ivoire.
+
 ## Secrets
 
 Required application variables:

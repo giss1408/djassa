@@ -6,6 +6,14 @@ Djassa should be built and sold as **merchant software first, financial infrastr
 
 The initial go-to-market unit is not a country or a continent. It is a **merchant cluster**: one city, trade association, distributor network, payment partner, or microfinance channel with enough connected merchants to reduce acquisition and support cost.
 
+## Long-term identity-platform opportunity
+
+The merchant event stream and progressive verification model could become the foundation for a federated identity trust service in Côte d'Ivoire. The commercial opportunity would not be selling identity data. It would be providing consent, verification orchestration, assurance-level normalization, and audit services to approved institutions.
+
+Potential customers could include payment providers, microfinance institutions, banks, merchant networks, and regulated digital-service operators. Monetization could eventually use partner integration fees, verification workflow fees, or enterprise subscriptions, subject to regulation and strict data-minimization rules.
+
+This opportunity must remain downstream of the merchant product. It requires governance, interoperability standards, liability allocation, privacy controls, and public/regulatory legitimacy before it can be sold as an identity platform.
+
 ## Customer segments
 
 ### Primary customers

@@ -10,6 +10,7 @@ This folder contains the English decision documents for the product and the tech
 - [Business model](BUSINESS-MODEL.md): merchant-first monetization, corridor strategy, pricing, and unit economics.
 - [Partner and outreach plan](PARTNERS-AND-OUTREACH.md): who to contact, why, what to ask, and how to run a pilot conversation.
 - [Product roadmap](ROADMAP.md): phases, dependencies, measurements, and exit criteria.
+- The long-term identity direction is documented in [PRODUCT-CONCEPT.md](PRODUCT-CONCEPT.md) and [ROADMAP.md](ROADMAP.md); it is a federated trust-layer hypothesis, not a current production claim.
 
 ## Technical
 

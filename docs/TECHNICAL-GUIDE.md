@@ -118,6 +118,8 @@ The current identity API is:
 
 Tier 1 and Tier 2 completion require a future licensed identity/KYC adapter or operator attestation path. The demo authentication system is not a production identity provider.
 
+The strategic identity architecture is federated rather than centralized: Djassa should exchange scoped, provider-issued attestations and consent records, not copy raw operator KYC, biometric, or national-ID databases. Each claim should include its issuer, assurance level, purpose, issue time, expiry/revocation status, and audit reference. The original operator or licensed KYC institution remains authoritative for the underlying verification.
+
 ## GraphQL
 
 GraphQL is available at `POST /graphql` as a complementary API surface. It currently exposes public country capability queries, authenticated `myTransactions` queries, and authenticated `syncTransactions` mutations with the same 50-operation limit and idempotency behavior as REST.

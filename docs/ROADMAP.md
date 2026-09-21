@@ -119,6 +119,27 @@ Djassa remains a technology and distribution partner unless its regulatory statu
 
 Possible extensions include a second UEMOA country, rural merchant networks, agriculture, and insurance. Each extension requires separate user research, local payment/support adapters, partner validation, and regulatory review. Expansion should reuse technical components while localizing commercial operations.
 
+## Strategic horizon: federated identity trust layer
+
+This is a long-term platform direction, not an MVP commitment.
+
+Potential capabilities:
+
+- Provider-issued identity attestations.
+- Consent and purpose management.
+- Assurance-level mapping across mobile-money, KYC, and financial partners.
+- Privacy-preserving partner verification.
+- Revocation, audit, and dispute workflows.
+- Interoperability APIs for approved institutions.
+
+Entry conditions:
+
+- Proven Tier 0 and partner-managed Tier 1/Tier 2 verification flows.
+- Written governance and data-sharing agreements.
+- Regulatory and privacy review with relevant Côte d'Ivoire authorities and licensed partners.
+- A clear liability model for incorrect, stale, or fraudulent identity claims.
+- Independent security and privacy assessment.
+
 ## Roadmap governance
 
 For every proposed feature, record:

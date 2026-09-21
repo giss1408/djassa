@@ -38,6 +38,23 @@ Users should not be forced through Tier 2 to use basic loyalty. Higher verificat
 
 The anti-fraud goal is to prevent one person from creating many accounts to farm rewards or manufacture a financial history, while avoiding unnecessary surveillance of low-risk users.
 
+## Strategic direction: a federated identity trust layer for Côte d'Ivoire
+
+Djassa can become the premise for a **federated identity manager** for Côte d'Ivoire: a consent-driven trust layer that connects existing identity authorities rather than replacing them. The network could connect mobile-money operators, licensed KYC providers, banks, microfinance institutions, merchants, and approved public or ecosystem partners.
+
+Djassa's role would be to:
+
+- Request verification for a specific purpose.
+- Obtain a provider-issued attestation or verification result.
+- Normalize assurance levels across providers.
+- Let the user view, consent to, and revoke data-sharing permissions.
+- Provide partners with the minimum identity claim required for a transaction or service.
+- Detect duplicate or contradictory identity signals without exposing unnecessary raw data.
+
+Djassa must not become the owner of the national identity system, copy every operator's KYC database, or issue a government identity. The long-term product is a **federation and consent layer**, with authoritative operators and licensed institutions retaining responsibility for the original verification.
+
+This direction requires a separate legal, governance, interoperability, privacy, and security program with ARTCI, BCEAO, mobile-money operators, identity providers, and qualified local counsel. It is a strategic opportunity, not a current product claim.
+
 ## The commercial wedge
 
 Djassa should not launch as a general African fintech. The first paying customer is the merchant, and the first paid problem is:
