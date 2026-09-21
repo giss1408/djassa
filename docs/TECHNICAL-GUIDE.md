@@ -62,6 +62,75 @@ export CELERY_BROKER_URL=redis://127.0.0.1:6379/0
 celery -A app.celery_app.celery_app worker --loglevel=info
 ```
 
+## Low-connectivity synchronization
+
+Clients should treat connectivity loss as normal. Queue transaction operations locally and assign each operation a stable, random `idempotency_key` of at least 8 characters. Retry the batch after reconnecting:
+
+```http
+POST /api/transactions/sync
+Authorization: Bearer TOKEN
+Content-Type: application/json
+```
+
+```json
+{
+	"operations": [
+		{
+			"idempotency_key": "device-20260921-0001",
+			"merchant_id": 42,
+			"amount": "12.50",
+			"currency": "XOF",
+			"type": "sale"
+		}
+	]
+}
+```
+
+The batch is limited to 50 operations. Each result is independently classified as `accepted`, `already_processed`, or `rejected`. The same key with a different payload is rejected. Clients should retain rejected operations for user review and remove accepted or already-processed operations from the local queue.
+
+For a single write, send the same key as the `Idempotency-Key` header on `POST /api/transactions`. Never generate a new key when retrying the same operation.
+
+## Country and support configuration
+
+Clients should load country capabilities instead of embedding country rules in the app:
+
+```http
+GET /api/config/countries/CI
+```
+
+The response describes the country currency, phone prefixes, supported languages, support channels, and payment-provider adapter names. The initial profiles cover Côte d'Ivoire (`CI`), Ghana (`GH`), Nigeria (`NG`), and Kenya (`KE`). Provider names are configuration identifiers; credentials and production integrations are still deployment-specific.
+
+Authenticated users can open a localized support request:
+
+```http
+POST /api/support/requests
+```
+
+The request includes `country_code`, `language`, `channel`, `category`, and `message`. The API validates that the selected language and channel are available for the selected country and stores the language/channel metadata so an operator or future SMS/WhatsApp adapter can route it correctly. The current confirmation catalog contains English and French; unsupported translations fall back to English while preserving the requested language for support handling.
+
+## GraphQL
+
+GraphQL is available at `POST /graphql` as a complementary API surface. It currently exposes public country capability queries, authenticated `myTransactions` queries, and authenticated `syncTransactions` mutations with the same 50-operation limit and idempotency behavior as REST.
+
+Use REST for provider webhooks and operational integrations. GraphQL resolvers must preserve the same ownership, pagination, payload-size, and Decimal-money rules. Do not add unrestricted transaction queries or expose secrets through the schema. In production, place GraphQL behind the gateway and review introspection, query-depth, and rate-limit settings.
+
+## Payment orchestration
+
+Djassa now models payment intents without pretending that the sandbox moves real money:
+
+```text
+created -> pending -> succeeded
+					-> failed
+					-> disputed
+succeeded -> refund_pending -> refunded
+```
+
+`POST /api/payments` validates the country/currency pair, creates an idempotent payment intent, calls the configured provider adapter with a timeout, and stores the provider's external transaction ID. `GET /api/payments/{id}` returns the owner-scoped state. Refunds and disputes have separate endpoints and persisted records.
+
+The default `PAYMENT_PROVIDER=sandbox` adapter is safe for tests and returns pending sandbox references. A live provider must implement the adapter contract in `app/services/payment_providers.py`, receive credentials from a secret manager through `PAYMENT_PROVIDER_API_KEY`, and provide signed callbacks and settlement reports.
+
+Provider callbacks must include an external ID, status, amount, and currency. The webhook path verifies the signature and replay window, then records a reconciliation row only when amount and currency match the payment intent. A valid signature alone never settles money.
+
 ## VPS test deployment
 
 Use the automated deployment script, not the development server:

@@ -30,6 +30,10 @@ Endpoints:
 - `POST /api/payments` — create payment (example)
 Additional endpoints:
 - `POST /api/transactions` — record a merchant transaction (requires auth)
+- `POST /api/transactions/sync` — submit up to 50 retry-safe offline transactions (requires auth)
 - `GET /api/transactions/merchant/{merchant_id}` — list merchant transactions (requires auth)
 - `POST /api/consents` — create consent for export (requires auth)
 - `GET /api/export/merchant/{merchant_id}` — export merchant transactions as CSV (requires consent)
+- `GET /api/config/countries` — list country capabilities for client configuration
+- `POST /api/support/requests` — create a country- and language-aware support request (requires auth)
+- `POST /graphql` — GraphQL country queries and authenticated transaction sync/read operations

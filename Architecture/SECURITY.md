@@ -57,6 +57,8 @@ Every provider callback must:
 
 A valid signature alone is never sufficient to credit money.
 
+Payment state transitions are explicit: a payment starts as `created`, becomes `pending` after provider initiation, and can reach `succeeded`, `failed`, `cancelled`, or `disputed` only through an allowed transition. Refunds use `refund_pending` and `refunded`. Invalid transitions are rejected by the domain state machine.
+
 ## Data protection
 
 - Collect only data needed for the declared user purpose.

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
-from .api import payments, auth, transactions, export, tontine, webhooks
+from .api import payments, auth, transactions, export, tontine, webhooks, config, support
+from .graphql_api import router as graphql_router
 from .db import engine
 from starlette.middleware import Middleware
 from slowapi.middleware import SlowAPIMiddleware
@@ -83,6 +84,9 @@ app.include_router(transactions.router, prefix="/api")
 app.include_router(export.router, prefix="/api")
 app.include_router(tontine.router, prefix="/api")
 app.include_router(webhooks.router)
+app.include_router(config.router, prefix="/api")
+app.include_router(support.router, prefix="/api")
+app.include_router(graphql_router, prefix="/graphql")
 
 # Expose /metrics endpoint for Prometheus to scrape (compose local)
 from fastapi.responses import Response

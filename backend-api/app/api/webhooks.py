@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Request, Header, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from ..db import get_db
-from ..models import WebhookEvent, WebhookIdempotency
+from ..models import Payment as PaymentModel, PaymentReconciliation, WebhookEvent, WebhookIdempotency
+from ..services.payment_state import PaymentStatus, transition
 from ..schemas.webhook import WebhookIn
 from ..rate_limiter import limiter
 import hmac
 import hashlib
 import json
+from decimal import Decimal, InvalidOperation
 from datetime import datetime, timezone
 import os
 REPLAY_WINDOW_SECONDS = int(os.getenv("WEBHOOK_REPLAY_WINDOW", "300"))
@@ -112,5 +115,39 @@ async def mobile_money_webhook(
         # fallback: process inline
         from ..services import tontine
         await tontine.process_webhook(external_id)
+
+    # Reconcile a matching payment intent when the provider includes status,
+    # amount, and currency. Business settlement remains provider-specific.
+    payment_result = await db.execute(select(PaymentModel).where(PaymentModel.external_id == str(external_id)))
+    payment = payment_result.scalar_one_or_none()
+    provider_status = str(payload.get("status", "")).lower()
+    if payment and provider_status in {"succeeded", "failed", "cancelled", "disputed"}:
+        try:
+            callback_amount = payload.get("amount")
+            callback_currency = str(payload.get("currency", "")).upper()
+            try:
+                callback_amount_value = Decimal(str(callback_amount))
+            except (InvalidOperation, TypeError, ValueError):
+                raise HTTPException(status_code=400, detail="invalid payment amount")
+            if callback_currency != payment.currency or callback_amount_value != payment.amount:
+                raise HTTPException(status_code=400, detail="payment amount or currency mismatch")
+            target = PaymentStatus(provider_status)
+            payment.status = transition(payment.status, target)
+            payment.provider_status = provider_status
+            db.add(PaymentReconciliation(
+                payment_id=payment.id,
+                external_id=str(external_id),
+                provider=payment.provider,
+                provider_status=provider_status,
+                amount=callback_amount_value,
+                currency=payment.currency,
+                raw_reference=str(payload.get("reference", ""))[:255] or None,
+            ))
+            await db.commit()
+        except HTTPException:
+            await db.rollback()
+            raise
+        except ValueError:
+            await db.rollback()
 
     return {"status": "accepted"}

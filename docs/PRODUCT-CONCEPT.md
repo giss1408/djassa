@@ -49,6 +49,7 @@ Djassa should facilitate access to financial services. It should not present its
 - Start with a small merchant pilot before building broad financial features.
 - Make every score explainable to the person affected by it.
 - Let users see and correct their own data.
+- Support low-bandwidth channels and local-language service workflows.
 - Keep customer and merchant data separate and permissioned.
 - Use regulated financial institutions for custody, lending, and payment settlement.
 - Treat women, rural users, and low-income users as primary users, not edge cases.

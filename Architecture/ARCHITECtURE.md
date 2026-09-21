@@ -65,6 +65,12 @@ flowchart TB
 
 A signature proves message authenticity; it does not prove that the amount, recipient, or business transaction is valid. Reconciliation and state-transition checks remain mandatory.
 
+## Payment boundary
+
+Djassa is the orchestration and record-keeping layer. A provider or regulated financial partner executes the actual wallet or bank movement. The API creates a payment intent, calls a country-selected provider adapter, stores the provider transaction ID, and updates state only after a verified callback or reconciliation result.
+
+The sandbox adapter is for integration tests only. Live adapters must be country-specific, use secret-manager credentials, enforce provider idempotency, apply timeouts and retries, and expose settlement/reconciliation data. Djassa must never mark a payment successful based only on a client response.
+
 ## Deployment contracts
 
 ### VPS integration test
